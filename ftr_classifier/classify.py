@@ -31,7 +31,8 @@ def _append_spacy_docs(df,lang_col,text_col):
         #apply model to language
         dy['spacy_doc'] = dy[text_col].apply(lambda x:  nlp(x) if isinstance(x,str) else nlp(""))
         #append together
-        dx = dx.append(dy)
+        dx = pd.concat([dx, dy])
+        #dx = dx.append(dy)
     return dx
 
 def _clean_non_applicable(df,lang_col):
@@ -48,7 +49,7 @@ def _clean_non_applicable(df,lang_col):
         else:
             pass
         #append
-        dx = dx.append(dy)
+        dx = pd.concat([dx, dy])
     return dx
 
 def _future_dom(df):
@@ -69,13 +70,13 @@ def _aspect_dom(df,lang_col='language'):
         if lang == 'english':
             dx['present_perfect'] = [1 if dx.present_perfect[x] == 1 and dx.past[x] == 1 and dx.future[x] == 0 else 0 for x in dx.index]
             dx['past_perfect'] = [1 if dx.past_perfect[x] == 1 and dx.past[x] == 1 and dx.future[x] == 0 else 0 for x in dx.index]
-            store = store.append(dx)
+            store = pd.concat([store, dx])
         elif lang == 'dutch':
             dx['present_perfect'] = [1 if dx.present_perfect[x] == 1 and dx.past_participle[x] == 1 and dx.future[x] == 0 else 0 for x in dx.index]
             dx['past_perfect'] = [1 if dx.past_perfect[x] == 1 and dx.past_participle[x] == 1 and dx.future[x] == 0 else 0 for x in dx.index]
-            store = store.append(dx)
+            store = pd.concat([store, dx])
         else:
-            store = store.append(dx)
+            store = pd.concat([store, dx])
     store.index = range(store.shape[0])
     return store
 
@@ -240,7 +241,7 @@ def score(df,lang_col,debug,process_col='final_sentence'):
         if debug:
             dy = pd.concat([dy,dy[process_col].apply(lambda doc: pd.Series(_debug_check_words(doc)))],axis=1)
         #append together
-        dx = dx.append(dy)       
+        dx = pd.concat([dx, dy])
     return dx
 
 def apply_dominance(df):
@@ -286,5 +287,12 @@ def clean_spacy(df):
     :return: df with cols 'final_sentence' and 'spacy_doc' dropped
     '''
     df = df.copy()
-    df = df.drop(['final_sentence','spacy_doc'],1)
+    try:
+         df.pop('final_sentence')
+    except:
+        print("final_sentence not found")
+    try:
+         df.pop('spacy_doc')
+    except:
+        print("spacy_doc not found")
     return df
