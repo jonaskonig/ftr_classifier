@@ -7,9 +7,12 @@ Created on Fri May 31 22:32:52 2019
 """
 
 
-INFO = {'version':'2.0',
+INFO = {'version':'2.1',
         "long_description" :
-        '''This is an implementation of the key-word analysis techniques described in Robertson et al. (TKTK). 
+        '''
+        This is a fork of https://pypi.org/project/ftr-classifier/ which has been updated to work with newer python versions up to 3.10
+        
+        This is an implementation of the key-word analysis techniques described in Robertson et al. (TKTK). 
         
         It is designed to classify future-time-referring sentences in English, Dutch, and German in terms of whether 
         they use the accepted "future" tense morphemes (i.e. will/shall/be going to (English); zullen/gaan (Dutch); or werden (German)),

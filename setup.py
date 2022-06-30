@@ -13,7 +13,7 @@ except ImportError:
     from distutils.core import setup, find_packages
 
 
-setup(name='ftr_classifier',
+setup(name='ftr_classifier2',
       py_modules=['ftr_classifier'],
       url = 'https://github.com/jonaskonig/ftr_classifier.git',
       author = 'cole robertson, Jonas Koenig',
