@@ -67,38 +67,63 @@ def _count_to_lemma_map(feature_lem_map,lexeme_counts):
 
 def _counter(df,lang_col,process_col='final_sentence',word_col='response_clean'):
     #group by language
-    df_groups = df.groupby(lang_col)
-    
-    #counts dict initiate
-    counts = deepcopy(WORD_LISTS)
-    
-    #add count data
     global word_sums
     word_sums = {}
+    counts = deepcopy(WORD_LISTS)
+    if lang_col=="english_all":
+        no_responses = len(df)
+        no_words = len(list(itertools.chain.from_iterable(df['response_clean'].to_list())))
+        word_sums['english'] = (no_responses, no_words)
+        for feature in counts['english']:
+            # count phrases
+            phrase_counts = {phrase: sum(df[process_col].apply(lambda doc: doc.text.lower().count(phrase))) \
+                             for phrase in counts['english'][feature][0]}
 
-    #iterate though langauges 
-    for lang,dy in df_groups:
-        #count uique words and length of dataframe to assign to counts df
-        no_responses = len(dy)
-        no_words = len(list(itertools.chain.from_iterable(dy['response_clean'].to_list())))
-        word_sums[lang] = (no_responses,no_words)
-        for feature in counts[lang]:
-            #count phrases
-            phrase_counts = {phrase : sum(dy[process_col].apply(lambda doc:doc.text.lower().count(phrase)))\
-                                      for phrase in counts[lang][feature][0]}
-            
-            #count phrase lemmas
-            phrase_lemma_counts = _count_to_lemma_map(LEMMA_MAP[lang][feature][0],phrase_counts)
+            # count phrase lemmas
+            phrase_lemma_counts = _count_to_lemma_map(LEMMA_MAP['english'][feature][0], phrase_counts)
 
-            #count word
-            word_counts = {word : sum(dy[word_col].apply(lambda response_clean: response_clean.count(word)))\
-                           for word in counts[lang][feature][1]}
-            
-            #count word lemmas
-            word_lemma_counts = _count_to_lemma_map(LEMMA_MAP[lang][feature][1],word_counts)
+            # count word
+            word_counts = {word: sum(df[word_col].apply(lambda response_clean: response_clean.count(word))) \
+                           for word in counts['english'][feature][1]}
 
-            #merge two together
-            counts[lang][feature] = {**phrase_lemma_counts, **word_lemma_counts}
+            # count word lemmas
+            word_lemma_counts = _count_to_lemma_map(LEMMA_MAP['english'][feature][1], word_counts)
+
+            # merge two together
+            counts['english'][feature] = {**phrase_lemma_counts, **word_lemma_counts}
+    else:
+        df_groups = df.groupby(lang_col)
+
+        # counts dict initiate
+
+
+        # add count data
+
+
+        # iterate though langauges
+        for lang, dy in df_groups:
+            # count uique words and length of dataframe to assign to counts df
+            no_responses = len(dy)
+            no_words = len(list(itertools.chain.from_iterable(dy['response_clean'].to_list())))
+            word_sums[lang] = (no_responses, no_words)
+            for feature in counts[lang]:
+                # count phrases
+                phrase_counts = {phrase: sum(dy[process_col].apply(lambda doc: doc.text.lower().count(phrase))) \
+                                 for phrase in counts[lang][feature][0]}
+
+                # count phrase lemmas
+                phrase_lemma_counts = _count_to_lemma_map(LEMMA_MAP[lang][feature][0], phrase_counts)
+
+                # count word
+                word_counts = {word: sum(dy[word_col].apply(lambda response_clean: response_clean.count(word))) \
+                               for word in counts[lang][feature][1]}
+
+                # count word lemmas
+                word_lemma_counts = _count_to_lemma_map(LEMMA_MAP[lang][feature][1], word_counts)
+
+                # merge two together
+                counts[lang][feature] = {**phrase_lemma_counts, **word_lemma_counts}
+
     return counts
 
 def _format_md(d,key):
@@ -145,15 +170,15 @@ def _format_citations(df,group_col):
         store = store.append(dx)
     return store
     
-def _merge_md(count_df):
-    df = count_df.copy()
+def _merge_md(df):
+    #df = count_df.copy()
     key_cols = ['language','feature','lemma']
     dy = pd.concat([df,df[key_cols].apply(lambda keys:pd.Series(_lookup_md(keys)),axis=1)],axis=1)
     return dy
 
 def count_lemmas(df,lang_col='language',text_col='response',md=True,**kwargs):
     #copy
-    df = df.copy()
+    #df = df.copy()
     
     #set WORD_LISTS as global
     global WORD_LISTS
@@ -162,8 +187,10 @@ def count_lemmas(df,lang_col='language',text_col='response',md=True,**kwargs):
     from ftr_classifier.word_lists import WORD_LISTS
     
     #get list of working languages
-    working_langs = list(set(df[lang_col]))
-    
+    if lang_col =='english_all':
+        working_langs = ['english'] * len(df)
+    else:
+        working_langs = list(set(df[lang_col]))
     #take out out of sample lanuages 
     WORD_LISTS = {key:value for (key,value) in WORD_LISTS.items() if key in working_langs}
     
@@ -179,7 +206,7 @@ def count_lemmas(df,lang_col='language',text_col='response',md=True,**kwargs):
     return counts_df
 
 
-def format_lemma_df(df_lemmas,
+def format_lemma_df(dx,
                    droprows=['will_future','go_future','particle','present'],
                    dropcols=['num_responses','num_words'],
                    min_count=1,
@@ -187,7 +214,7 @@ def format_lemma_df(df_lemmas,
                             'gloss','justification', 'citation(s)'],
                    group_col='language'
                    ):
-    dx = df_lemmas.copy()
+    #dx = df_lemmas.copy()
     dx = dx.loc[~dx.feature.isin(droprows),:]
     dx['percent'] = round(dx['count']/dx['num_responses']*100,2)
     dx.percent = dx.percent.apply(lambda x: str(x)+'\\%')
