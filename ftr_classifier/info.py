@@ -7,7 +7,10 @@ Created on Fri May 31 22:32:52 2019
 """
 
 
-INFO = {'version':'2.0',
+
+
+INFO = {'version':'reddit-1.2.16f',
+
         "long_description" :
         '''This is an implementation of the key-word analysis techniques described in Robertson et al. (TKTK). 
         

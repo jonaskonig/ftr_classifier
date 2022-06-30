@@ -30,7 +30,8 @@ META_FEATURE_MAP = {'future':'future',
        'verb_des_int':'verbal bouletic',
        'present_perfect': 'the present perfect',
        'past_perfect':'the past perfect',
-       'past_participle':'the past participle'
+       'past_participle':'the past participle',
+       'verb_irr':"verbal irrialis"
        
        }
 
@@ -53,7 +54,8 @@ FEATURE_NAME_MAP = {'future':"grammar book ``futures''",
                     'verb_des_int':'verbs of desire/intention',
                     'present_perfect': 'the present perfect',
                     'past_perfect':'the past perfect',
-                    'past_participle':'the past participle'
+                    'past_participle':'the past participle',
+                    'verb_irr':"verbal irrialis, e.g. 'would'"
                     }
 
 PAST = ['past']
@@ -63,6 +65,8 @@ DESIRE = ['verb_des_int']
 ASPECTS = ['present_perfect','past_perfect']
 
 PP = ['past_participle']
+
+IRR = ["verb_irr"]
 
 SUBMISSIVE_FEATURES = ['present','future','will_future','go_future']
 
@@ -82,7 +86,7 @@ EXTRA_FEATURES = ['negated','no_code',"mixed_modality"]
 MAIN_FEATURES = ['lexi_poss','lexi_cert','future_dom',
                   'present_dom','verb_poss','verb_cert','uncertain','certain']
 
-FEATURES = DOMINANT_FEATURES + SUBMISSIVE_FEATURES + PAST + DESIRE + ASPECTS
+FEATURES = DOMINANT_FEATURES + SUBMISSIVE_FEATURES + PAST + DESIRE + ASPECTS + IRR
 ALL_FEATURES = FEATURES + DOMINATED_FEATURES + SUMMARY_FEATURES + EXTRA_FEATURES + PP
 
 # =============================================================================
@@ -455,24 +459,37 @@ english = {'present': (
                'are going',
                'am going',
                'going to',
+               'go to',
+               'to go',
                'gonna',"gona","gonn",#spelling
                'theyll',
-               'they`ll',
+               "they`ll",
+               "they'll",
                "i'll",
                "you'll",
                "he'll",
                "she'll",
-               "we'll"
+               "we'll",
+               "won’t",
+               "he’ll",
+               "she’ll",
+               "we’ll",
+               "they’ll",
+               "you’ll",
+               "wont",#typ0
+               "won't",
+               "won’t",
+               "'ll",
+               "’ll",
                ],
               ['will',
                'wil',
                'twill',#typos
                'willbe',#typos
                'gonna',
-               "wont",#typ0
-               "won't",
+               'go',
+               "going",
                'shall',
-               "'ll",
                "ll",
                "youll",#typos
                "shell",
@@ -480,22 +497,31 @@ english = {'present': (
             ),
     
     'verb_poss':([],
-                 ['can',
+                 [#'can',
                   'may',
                   'could',
                   'coud',#typo
                   'might',
                   'should',
                   'sould',#typo
-                  'ought',
-                  'would',#used epistemically in the 'what your brother would do... question, i.e. as a conditional 
-                  'wouls'#typo
+                  'ought'
                   ]
                  ),
     
-    'verb_cert':([#'have to',
-                  #'got to',
-                  #'has to'
+    'verb_irr':([],
+                ['would',#used epistemically in the 'what your brother would do... question, i.e. as a conditional 
+                  'wouls',#typo
+                  "wouldn’t",
+                  "'d",
+                  "if"
+                  ]
+                  ),
+    
+    'verb_cert':(['have to',
+                  'got to',
+                  'has to',
+                  'need to',
+                  "needs to"
                   ],
                  ['must']
                  ),
@@ -554,6 +580,9 @@ english = {'present': (
                 'positive',
                 'clearly',
                 'doubtless',
+                "guarantee",
+                "guaranteed",
+                "garuntee",
                 'indubitably',
                 'indubitable',
                 'inevitably',
@@ -578,6 +607,7 @@ english = {'present': (
                 "absolute"]
                ),
     'mental_poss':(['feel like',
+                    "feels like",
                     'not too sure',
                     'i am not sure',
                     'not certain',
@@ -586,7 +616,7 @@ english = {'present': (
                    ['think',
                     'thinking',
                     'thinks',
-                    'thought',
+                    #'thought',
                     'believe',
                     'believes',
                     'believed',
@@ -601,7 +631,7 @@ english = {'present': (
                     'expecting',
                     'expectably',
                     'expectedly',
-                    'aspect',#expect misspelling
+                    #'aspect',#expect misspelling
                     'doubt',
                     'doubts',
                     'doubted',
@@ -637,27 +667,43 @@ english = {'present': (
                     "she'll",
                     "we'll"
                     "youll",
-                    "shell",
-                    'ill'],
+                    "shell"],
                    ['will',
                     'willbe',
                     'wil',
                     "'ll",
-                    "ll"]
+                    "ll",
+                    'ill']
                    ),
-    'go_future':(['is going','are going',
+    'go_future':(['is going','are going','to gp','go to'
                    'am going','going to','gonna'],
-                 []
+                 ['go']
                  ),
     
-    'verb_des_int':([],
+    'verb_des_int':(["looking forward",
+                     "looking to",
+                     "can’t wait",
+                     "cant wait",
+                     "love to",
+                     "love for"],
                    ['want',
+                    "wanna",
                     'wanting',
                     'wants',
+                    "wanted",
                     'hope',
                     "hopely",
                     'hoping',
                     'hopes',
+                    #"need",
+                    #"needs",
+                    #"needing",
+                    "wish",
+                    "wishing",
+                    "wishes",
+                    "try",
+                    "trying",
+                    "tries",
                     'hopefully',
                     'planning',
                     'plan',
@@ -1345,6 +1391,11 @@ dutch = {'present':(['is het','vallen om','storten in',
                       'zouden'
                       ] #i.e. mogen + prefix ver-
                      ),
+        
+        'verb_irr':([],
+                    []
+                    ),
+        
         'verb_cert':([],
                      ['moeten',
                       'moet',
@@ -1723,6 +1774,11 @@ german = {'present':(['nutze ab',
                   'müssten',
                   'müsstet']
                  ),
+    
+            
+    'verb_irr':([],
+                []
+                ),
     
     'verb_cert':([],
                  ['muss',

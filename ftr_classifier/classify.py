@@ -7,12 +7,22 @@ Created on Fri May 31 22:32:52 2019
 """
 # load libraries
 import pandas as pd
+import spacy
+import os
 
 # local imports
 from ftr_classifier.word_lists import FEATURES, WORD_LISTS, ALL_FEATURES
 from ftr_classifier.models import MODELS
 
-# fuck off pandas
+
+# =============================================================================
+# #set localle
+# =============================================================================
+DIR = os.path.dirname(os.path.realpath(__file__))
+MOD ='/ftr_ptr_mod'
+
+#fuck off pandas
+
 pd.options.mode.chained_assignment = None  # default='warn'
 
 # define missing data flag
@@ -122,15 +132,20 @@ def _past_dom(df):
     return df
 
 
-def _present_dom(df):
-    # df = df.copy()
-    # other features not pres
-    other_features = [x for x in FEATURES if x != 'present' and x not in ['particle', 'past_perfect']]
-    # apply
-    df['present_dom'] = [0 if any(feature == 1 for feature in df.loc[x, other_features]) \
-                             else 1 if df.present[x] == 1 \
-        else 0 \
-                         for x in df.index]
+def _present_dom(df,experimental_data=True):
+    #df = df.copy()
+    #other features not pres
+    other_features = [x for x in FEATURES if x != 'present' and x not in ['particle','past_perfect']]
+    if experimental_data:
+        #apply
+        df['present_dom'] = [0 if any(feature == 1 for feature in df.loc[x,other_features])\
+                              else 1 if df.present[x] == 1 \
+                              else 0\
+                              for x in df.index]
+    else:
+        df['present_dom'] = [0 if any(feature == 1 for feature in df.loc[x,other_features])\
+                              else 1 for x in df.index]
+
     return df
 
 
@@ -144,14 +159,18 @@ def _modal_exclude(df):
                    df.index]
     return df
 
-
-def _make_lexi_vars(df):
-    # df = df.copy()
-    # make features lists
-    poss_features = [x for x in FEATURES if x.endswith('poss')]
-    cert_features = [x for x in FEATURES if x.endswith('cert')]
-
-    # lexi_sumary
+def _make_lexi_vars(df,experimental_data):
+    #df = df.copy()
+    #make features lists
+    if experimental_data:
+        poss_features = [x for x in FEATURES  if x.endswith('poss')]
+        cert_features = [x for x in FEATURES if x.endswith('cert')]
+    else:
+        poss_features = [x for x in FEATURES  if x.endswith('poss')]
+        cert_features = [x for x in FEATURES if x.endswith('cert') and not x.startswith("verb")]
+        
+    
+    #lexi_sumary
     lexi_poss_features = [x for x in poss_features if not x.startswith('verb')]
     lexi_cert_features = [x for x in cert_features if not x.startswith('verb')]
 
@@ -307,7 +326,14 @@ def score(df, lang_col, debug, process_col='final_sentence'):
     return dx
 
 
-def apply_dominance(df, lang_col):
+def estimate_ftr_ptr(df,lang_col="language",text_col="response"):
+    mod_path = DIR+MOD
+    ftr_mod = spacy.load(mod_path)
+    dx = pd.concat([df,df[text_col].apply(lambda response: pd.Series(ftr_mod(response).cats))],axis=1)
+    return dx
+
+def apply_dominance(df,lang_col ,experimental_data):
+
     """ Apply dominance scoring hierarchy described in Robertson et al. (TKTK), columns subjected to the dominance 
     relationship are appended to df with a "_dom" suffix. Additionally appends two columns: 
         1) df['lexi_cert'] indicating  whether ANY certainty expression is used
@@ -319,26 +345,26 @@ def apply_dominance(df, lang_col):
     df = _future_dom(df)
     df = _aspect_dom(df, lang_col)
     df = _past_dom(df)
-    df = _present_dom(df)
+    df = _present_dom(df,experimental_data)
     df = _modal_exclude(df)
-    df = _make_lexi_vars(df)
+    df = _make_lexi_vars(df,experimental_data)
     df = _make_no_code(df)
     return df
+def classify_df(df,lang_col='language',text_col='response',suffix=None,debug=False,experimental_data=True,**kwargs):
 
-
-def classify_df(df, lang_col='language', text_col='response', suffix=None, debug=False, **kwargs):
     """ Sequentially call prepare(df), score(df), and apply_dominance(df)
     :param df: a pandas.DataFrame() object which MUST match criteria described in prepare() description.
     :param **kwargs: any key_word arguments passable to prepare() or score(), 
     i.e. defining non-default values for text_col,lang_col,clean_spacy,and process_col, though if process_col is changed without adjusting _append_last_sentence for agreement, an error will result
     :return: pd.Dataframe()
     """
-    # df = df.copy()
-    df = prepare(df, lang_col, text_col)
-    # debug by returning the 'hit' words
-    df = score(df, lang_col, debug, **kwargs)
-    # apply dominance
-    df = apply_dominance(df, lang_col)
+
+    df = df.copy()
+    df = prepare(df,lang_col,text_col)
+    #debug by returning the 'hit' words
+    df = score(df,lang_col,debug,**kwargs)
+    #apply dominance
+    df = apply_dominance(df,lang_col,experimental_data)
     if suffix:
         df = add_suffix(df, suffix)
     df = _clean_non_applicable(df, lang_col)
