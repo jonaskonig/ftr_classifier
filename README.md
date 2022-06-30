@@ -29,20 +29,22 @@ import ftr_classifier as ftr
 df = pd.read_excel('data.xlsx')*
 
 #classify
-"""
-to implement the spaCy model which estimates whether an item of text refers to the future (and the past) run:
-"""
-ftr.estimate_ftr_ptr(df)
+
 
 
 """
 to implement the ftr-classifier, whih estimates how an FTR statement refers to the future, run:
 """
+
 class_df = ftr.classify_df(df) 
+#If your dataset has no language column use:
+class_df = ftr.classify_df(df, lang_col='english_all', text_col='content')
+#text_col='content' will set the column where the text ist:
 
 #count lemmas
 lemma_count = ftr.count_lemmas(class_df)
-
+#If your dataset has no language column use:
+lemma_count = ftr.count_lemmas(class_df,lang_col='english_all')
 #clean spacy docs
 class_df = ftr.clean_spacy(class_df)
 
