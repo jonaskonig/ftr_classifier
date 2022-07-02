@@ -281,10 +281,10 @@ def score(df, lang_col, debug, process_col='final_sentence'):
         # apply function to lang-specific group
         df = pd.concat([df, df[process_col].apply(lambda doc: pd.Series(_check_words(doc)))], axis=1)
         df['negated'] = df[process_col].apply(lambda doc: _is_negated(doc))
-            # add lists of hit words to debug if necessary
+        # add lists of hit words to debug if necessary
         if debug:
             dy = pd.concat([df, df[process_col].apply(lambda doc: pd.Series(_debug_check_words(doc)))], axis=1)
-         # append together
+        # append together
         return df
 
     else:
@@ -324,6 +324,20 @@ def apply_dominance(df, lang_col):
     df = _make_lexi_vars(df)
     df = _make_no_code(df)
     return df
+
+
+def classify_str(sentence, lang='english', getfuturedom=True):
+    global _word_list
+    _word_list = WORD_LISTS[lang]
+    nlp = MODELS[lang]
+    # apply model to language
+    spacy_doc = nlp(sentence) if isinstance(sentence, str) else nlp("")
+    checkwords = _check_words(spacy_doc)
+    if getfuturedom:
+        futures = ['go_future', 'will_future', 'future']
+        return 1 if any(checkwords[f] == 1 for f in futures) else 0
+    else:
+        return checkwords
 
 
 def classify_df(df, lang_col='language', text_col='response', suffix=None, debug=False, **kwargs):

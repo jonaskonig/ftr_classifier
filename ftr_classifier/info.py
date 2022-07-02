@@ -7,11 +7,11 @@ Created on Fri May 31 22:32:52 2019
 """
 
 
-INFO = {'version':'2.1',
+INFO = {'version':'2.2',
         "long_description" :
         '''
         This is a fork of https://pypi.org/project/ftr-classifier/ which has been updated to work with newer python versions up to 3.10
-        
+        A funktion was added, that can classify single strings(classify_str())
         This is an implementation of the key-word analysis techniques described in Robertson et al. (TKTK). 
         
         It is designed to classify future-time-referring sentences in English, Dutch, and German in terms of whether 
